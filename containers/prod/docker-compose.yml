@@ -3,21 +3,21 @@ version: '3.8'
 services:
   xavia-ota:
     build:
-      context: .
+      context: ../..
       dockerfile: dockerfile
     ports:
       - '3000:3000'
     environment:
       - NODE_ENV=production
-      - BLOB_STORAGE_TYPE=local
-      - DB_TYPE=supabase
+      - BLOB_STORAGE_TYPE=${BLOB_STORAGE_TYPE:-supabase}
+      - DB_TYPE=${DB_TYPE:-supabase}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - PRIVATE_KEY_BASE_64=${PRIVATE_KEY_BASE_64}
       - SUPABASE_URL=${SUPABASE_URL}
       - SUPABASE_API_KEY=${SUPABASE_API_KEY}
-      - HOST=${HOST}
       - SUPABASE_BUCKET_NAME=${SUPABASE_BUCKET_NAME}
-      - LOG_LEVEL=info
+      - HOST=${HOST}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
       - NEXT_TELEMETRY_DISABLED=1
     volumes:
       - uploads:/app/uploads
