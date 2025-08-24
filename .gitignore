@@ -46,3 +46,6 @@ code-signing-keys
 # IntelliJ
 #
 .idea
+
+.env.*
+.env
