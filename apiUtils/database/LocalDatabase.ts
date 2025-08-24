@@ -1,6 +1,11 @@
 import { Pool } from 'pg';
 
-import { DatabaseInterface, Release, Tracking, TrackingMetrics } from './DatabaseInterface';
+import {
+  DatabaseInterface,
+  Release,
+  Tracking,
+  TrackingMetrics,
+} from './DatabaseInterface';
 import { Tables } from './DatabaseFactory';
 
 export class PostgresDatabase implements DatabaseInterface {
@@ -15,7 +20,9 @@ export class PostgresDatabase implements DatabaseInterface {
       port: parseInt(process.env.POSTGRES_PORT ?? '5432', 10),
     });
   }
-  async getLatestReleaseRecordForRuntimeVersion(runtimeVersion: string): Promise<Release | null> {
+  async getLatestReleaseRecordForRuntimeVersion(
+    runtimeVersion: string,
+  ): Promise<Release | null> {
     const query = `
       SELECT id, runtime_version as "runtimeVersion", path, timestamp, commit_hash as "commitHash"
       FROM ${Tables.RELEASES} WHERE runtime_version = $1

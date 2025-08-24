@@ -50,13 +50,15 @@ const logger = winston.createLogger({
       const { timestamp, level, message: logMessage, ...metadata } = info;
       const { loggerName } = metadata.metadata as { loggerName: string };
 
-      const msg = `[${moment().utc().format('YYYY-MM-DD HH:mm:ss')}] [${level}] ${padLoggerName(
+      const msg = `[${moment()
+        .utc()
+        .format('YYYY-MM-DD HH:mm:ss')}] [${level}] ${padLoggerName(
         '[' + loggerName + ']',
-        60
+        60,
       )} ${logMessage} ${formatMeta(metadata)}`;
 
       return msg;
-    })
+    }),
   ),
   transports: [
     new winston.transports.Console(),
@@ -67,7 +69,10 @@ const logger = winston.createLogger({
 export const getLogger = (module: NodeModule | string) => {
   // if no custom name provided, use filename and parent folder
 
-  const name = typeof module === 'string' ? module : module.filename.split('/').slice(-2).join('/');
+  const name =
+    typeof module === 'string'
+      ? module
+      : module.filename.split('/').slice(-2).join('/');
 
   return logger.child({ loggerName: name });
 };

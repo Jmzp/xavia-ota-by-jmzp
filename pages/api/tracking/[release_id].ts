@@ -4,7 +4,10 @@ import { getLogger } from '../../../apiUtils/logger';
 
 const logger = getLogger('trackingByReleaseHandler');
 
-export default async function trackingByReleaseHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function trackingByReleaseHandler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

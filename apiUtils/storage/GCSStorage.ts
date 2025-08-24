@@ -18,10 +18,15 @@ export class GCSStorage implements StorageInterface {
   async copyFile(sourcePath: string, destinationPath: string): Promise<void> {
     console.log('Copying file from', sourcePath, 'to', destinationPath);
 
-    const copyDestination = this.storage.bucket(this.bucketName).file(destinationPath);
-    await this.storage.bucket(this.bucketName).file(sourcePath).copy(copyDestination);
+    const copyDestination = this.storage
+      .bucket(this.bucketName)
+      .file(destinationPath);
+    await this.storage
+      .bucket(this.bucketName)
+      .file(sourcePath)
+      .copy(copyDestination);
     console.log(
-      `gs://${this.bucketName}/${sourcePath} copied to gs://${this.bucketName}/${destinationPath}`
+      `gs://${this.bucketName}/${sourcePath} copied to gs://${this.bucketName}/${destinationPath}`,
     );
   }
 
@@ -41,7 +46,9 @@ export class GCSStorage implements StorageInterface {
         .split('/')[0];
     });
 
-    return innerFolders.filter((value, index, array) => array.indexOf(value) === index);
+    return innerFolders.filter(
+      (value, index, array) => array.indexOf(value) === index,
+    );
   }
 
   async uploadFile(path: string, file: Buffer): Promise<string> {

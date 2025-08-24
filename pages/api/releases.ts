@@ -3,7 +3,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { DatabaseFactory } from '../../apiUtils/database/DatabaseFactory';
 import { StorageFactory } from '../../apiUtils/storage/StorageFactory';
 
-export default async function releasesHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function releasesHandler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -13,7 +16,8 @@ export default async function releasesHandler(req: NextApiRequest, res: NextApiR
     const storage = StorageFactory.getStorage();
     const directories = await storage.listDirectories('updates/');
 
-    const releasesWithCommitHash = await DatabaseFactory.getDatabase().listReleases();
+    const releasesWithCommitHash =
+      await DatabaseFactory.getDatabase().listReleases();
 
     const releases = [];
     for (const directory of directories) {
@@ -22,7 +26,9 @@ export default async function releasesHandler(req: NextApiRequest, res: NextApiR
       const runtimeVersion = directory;
 
       for (const file of files) {
-        const release = releasesWithCommitHash.find((r) => r.path === `${folderPath}/${file.name}`);
+        const release = releasesWithCommitHash.find(
+          (r) => r.path === `${folderPath}/${file.name}`,
+        );
         const commitHash = release ? release.commitHash : null;
         releases.push({
           path: release?.path || `${folderPath}/${file.name}`,

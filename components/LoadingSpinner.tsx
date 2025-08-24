@@ -1,9 +1,19 @@
-import { Box, BoxProps, Spinner, SpinnerProps } from '@chakra-ui/react';
+import { Box, CircularProgress } from '@mui/material';
 
-export default function LoadingSpinner(props: BoxProps & SpinnerProps) {
+interface LoadingSpinnerProps {
+  size?: number;
+}
+
+export default function LoadingSpinner({ size = 40 }: LoadingSpinnerProps) {
   return (
-    <Box className="flex justify-center items-center w-full h-full" {...props}>
-      <Spinner size={props.size} {...props} />
+    <Box
+      display="flex"
+      justifyContent="center"
+      alignItems="center"
+      width="100%"
+      height="100%"
+    >
+      <CircularProgress size={size} />
     </Box>
   );
 }

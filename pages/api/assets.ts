@@ -6,7 +6,10 @@ import { UpdateHelper } from '../../apiUtils/helpers/UpdateHelper';
 import { ZipHelper } from '../../apiUtils/helpers/ZipHelper';
 import { getLogger } from '../../apiUtils/logger';
 
-export default async function assetsEndpoint(req: NextApiRequest, res: NextApiResponse) {
+export default async function assetsEndpoint(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const logger = getLogger('api/assets');
   const { asset: assetPath, runtimeVersion, platform } = req.query;
 
@@ -29,9 +32,10 @@ export default async function assetsEndpoint(req: NextApiRequest, res: NextApiRe
   }
 
   try {
-    const updateBundlePath = await UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync(
-      runtimeVersion as string
-    );
+    const updateBundlePath =
+      await UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync(
+        runtimeVersion as string,
+      );
     const zip = await ZipHelper.getZipFromStorage(updateBundlePath);
 
     const { metadataJson } = await UpdateHelper.getMetadataAsync({
@@ -40,7 +44,7 @@ export default async function assetsEndpoint(req: NextApiRequest, res: NextApiRe
     });
 
     const assetMetadata = metadataJson.fileMetadata[platform].assets.find(
-      (asset: any) => asset.path === assetPath
+      (asset: any) => asset.path === assetPath,
     );
     const isLaunchAsset = metadataJson.fileMetadata[platform].bundle === assetPath;
 
@@ -62,7 +66,9 @@ export default async function assetsEndpoint(req: NextApiRequest, res: NextApiRe
     res.statusCode = 200;
     res.setHeader(
       'content-type',
-      isLaunchAsset ? 'application/javascript' : nullthrows(mime.getType(assetMetadata.ext))
+      isLaunchAsset
+        ? 'application/javascript'
+        : nullthrows(mime.getType(assetMetadata.ext)),
     );
     res.setHeader('content-length', asset.length);
     res.setHeader('cache-control', 'public, max-age=31536000, immutable');

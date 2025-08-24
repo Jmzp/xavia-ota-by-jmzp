@@ -1,16 +1,14 @@
 import {
   Card,
   CardHeader,
-  Heading,
-  CardBody,
-  SimpleGrid,
+  CardContent,
+  Typography,
+  Grid,
   Box,
-  Text,
-  Tag,
-  VStack,
-  HStack,
+  Chip,
+  Stack,
   Divider,
-} from '@chakra-ui/react';
+} from '@mui/material';
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { TrackingMetrics } from '../apiUtils/database/DatabaseInterface';
@@ -44,13 +42,15 @@ export default function Dashboard() {
       const trackingResponse = await fetch('/api/tracking/all');
       const trackingData = (await trackingResponse.json()) as AllTrackingResponse;
 
-      setTotalDownloaded(trackingData.trackings.reduce((acc, curr) => acc + curr.count, 0));
+      setTotalDownloaded(
+        trackingData.trackings.reduce((acc, curr) => acc + curr.count, 0),
+      );
 
       const iosData = trackingData.trackings.filter(
-        (metric: TrackingMetrics) => metric.platform === 'ios'
+        (metric: TrackingMetrics) => metric.platform === 'ios',
       );
       const androidData = trackingData.trackings.filter(
-        (metric: TrackingMetrics) => metric.platform === 'android'
+        (metric: TrackingMetrics) => metric.platform === 'android',
       );
 
       setIosDownloads(iosData.reduce((acc, curr) => acc + curr.count, 0));
@@ -73,119 +73,144 @@ export default function Dashboard() {
   }, []);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <Layout>
+        <LoadingSpinner />
+      </Layout>
+    );
   }
 
   return (
     <Layout>
       <ProtectedRoute>
-        <Heading mb={4}>Dashboard</Heading>
+        <Typography variant="h4" sx={{ mb: 4 }}>
+          Dashboard
+        </Typography>
 
         {/* Global Stats */}
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6} mb={8}>
-          <Card>
-            <CardHeader>
-              <Heading size="md">Total Downloads</Heading>
-            </CardHeader>
-            <CardBody>
-              <Heading size="lg">{totalDownloaded}</Heading>
-            </CardBody>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Heading size="md">iOS Downloads</Heading>
-            </CardHeader>
-            <CardBody>
-              <Heading size="lg">{iosDownloads}</Heading>
-            </CardBody>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Heading size="md">Android Downloads</Heading>
-            </CardHeader>
-            <CardBody>
-              <Heading size="lg">{androidDownloads}</Heading>
-            </CardBody>
-          </Card>
-          <Card>
-            <CardHeader>
-              <Heading size="md">Total Releases</Heading>
-            </CardHeader>
-            <CardBody>
-              <Heading size="lg">{totalReleases}</Heading>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
-
-        {/* Runtime Versions Section */}
-        <Box mb={6}>
-          <Heading size="lg" mb={4}>
-            Runtime Versions
-          </Heading>
-          <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
-            {runtimeSummaries.map((runtime) => (
-              <Card key={runtime.runtimeVersion} borderWidth={2} borderColor="blue.200">
-                <CardHeader pb={2}>
-                  <HStack justify="space-between" align="center">
-                    <Heading size="md">Runtime {runtime.runtimeVersion}</Heading>
-                    <Tag colorScheme="blue" size="sm">
-                      v{runtime.runtimeVersion}
-                    </Tag>
-                  </HStack>
-                </CardHeader>
-                <CardBody pt={0}>
-                  <VStack align="stretch" spacing={3}>
-                    <Box>
-                      <Text fontSize="sm" color="gray.600" mb={1}>
-                        Active Release:
-                      </Text>
-                      {runtime.activeRelease ? (
-                        <VStack align="stretch" spacing={1}>
-                          <Text fontSize="sm" fontWeight="medium">
-                            {runtime.activeRelease.path.split('/').pop()}
-                          </Text>
-                          <Text fontSize="xs" color="gray.500">
-                            {moment(runtime.activeRelease.timestamp).format('MMM DD, YYYY HH:mm')}
-                          </Text>
-                          {runtime.activeRelease.commitHash && (
-                            <Text fontSize="xs" color="blue.600">
-                              {runtime.activeRelease.commitHash.substring(0, 8)}
-                            </Text>
-                          )}
-                        </VStack>
-                      ) : (
-                        <Text fontSize="sm" color="gray.400">
-                          No releases
-                        </Text>
-                      )}
-                    </Box>
-
-                    <Divider />
-
-                    <HStack justify="space-between">
-                      <Text fontSize="sm" color="gray.600">
-                        Total Releases:
-                      </Text>
-                      <Tag size="sm" colorScheme="gray">
-                        {runtime.totalReleases}
-                      </Tag>
-                    </HStack>
-                  </VStack>
-                </CardBody>
-              </Card>
-            ))}
-          </SimpleGrid>
-
-          {runtimeSummaries.length === 0 && (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} md={6} lg={3}>
             <Card>
-              <CardBody>
-                <Text color="gray.500" textAlign="center">
-                  No runtime versions found. Upload your first release to get started.
-                </Text>
-              </CardBody>
+              <CardHeader
+                title={<Typography variant="h6">Total Downloads</Typography>}
+              />
+              <CardContent>
+                <Typography variant="h4">{totalDownloaded}</Typography>
+              </CardContent>
             </Card>
-          )}
-        </Box>
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <Card>
+              <CardHeader
+                title={<Typography variant="h6">iOS Downloads</Typography>}
+              />
+              <CardContent>
+                <Typography variant="h4">{iosDownloads}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <Card>
+              <CardHeader
+                title={<Typography variant="h6">Android Downloads</Typography>}
+              />
+              <CardContent>
+                <Typography variant="h4">{androidDownloads}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid item xs={12} md={6} lg={3}>
+            <Card>
+              <CardHeader
+                title={<Typography variant="h6">Total Releases</Typography>}
+              />
+              <CardContent>
+                <Typography variant="h4">{totalReleases}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        {/* Runtime Summaries */}
+        <Typography variant="h5" sx={{ mb: 3 }}>
+          Runtime Versions
+        </Typography>
+        <Grid container spacing={3}>
+          {runtimeSummaries.map((runtime) => (
+            <Grid item xs={12} md={6} lg={4} key={runtime.runtimeVersion}>
+              <Card
+                sx={{ borderWidth: 1, borderColor: 'divider', borderStyle: 'solid' }}
+              >
+                <CardHeader
+                  title={
+                    <Stack
+                      direction="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                    >
+                      <Typography variant="h6">
+                        Runtime {runtime.runtimeVersion}
+                      </Typography>
+                      <Chip
+                        label={`${runtime.totalReleases} releases`}
+                        color="primary"
+                        size="small"
+                      />
+                    </Stack>
+                  }
+                />
+                <CardContent>
+                  <Stack spacing={2}>
+                    {runtime.activeRelease ? (
+                      <>
+                        <Typography variant="body2" color="text.secondary">
+                          <strong>Active Release:</strong>{' '}
+                          {runtime.activeRelease.path}
+                        </Typography>
+                        <Stack spacing={1}>
+                          <Typography variant="body2" color="text.secondary">
+                            <strong>Released:</strong>{' '}
+                            {moment(runtime.activeRelease.timestamp).format(
+                              'MMM DD, YYYY HH:mm',
+                            )}
+                          </Typography>
+                          {runtime.activeRelease.commitHash && (
+                            <Typography variant="body2" color="text.secondary">
+                              <strong>Commit:</strong>{' '}
+                              {runtime.activeRelease.commitHash.substring(0, 8)}
+                            </Typography>
+                          )}
+                          {runtime.activeRelease.commitMessage && (
+                            <Stack spacing={1}>
+                              <Divider />
+                              <Typography variant="body2" color="text.secondary">
+                                {runtime.activeRelease.commitMessage}
+                              </Typography>
+                            </Stack>
+                          )}
+                        </Stack>
+                      </>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No active release
+                      </Typography>
+                    )}
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {runtimeSummaries.length === 0 && (
+          <Card>
+            <CardContent>
+              <Typography variant="body1" color="text.secondary" textAlign="center">
+                No runtime versions found. Upload your first release to get started.
+              </Typography>
+            </CardContent>
+          </Card>
+        )}
       </ProtectedRoute>
     </Layout>
   );

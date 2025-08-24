@@ -28,5 +28,7 @@ export interface DatabaseInterface {
   createTracking(tracking: Omit<Tracking, 'id'>): Promise<Tracking>;
   getReleaseTrackingMetrics(releaseId: string): Promise<TrackingMetrics[]>;
   getReleaseTrackingMetricsForAllReleases(): Promise<TrackingMetrics[]>;
-  getLatestReleaseRecordForRuntimeVersion(runtimeVersion: string): Promise<Release | null>;
+  getLatestReleaseRecordForRuntimeVersion(
+    runtimeVersion: string,
+  ): Promise<Release | null>;
 }

@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-import { DatabaseInterface, Release, Tracking, TrackingMetrics } from './DatabaseInterface';
+import {
+  DatabaseInterface,
+  Release,
+  Tracking,
+  TrackingMetrics,
+} from './DatabaseInterface';
 import { Tables } from './DatabaseFactory';
 
 export class SupabaseDatabase implements DatabaseInterface {
@@ -17,7 +22,9 @@ export class SupabaseDatabase implements DatabaseInterface {
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
 
-  async getLatestReleaseRecordForRuntimeVersion(runtimeVersion: string): Promise<Release | null> {
+  async getLatestReleaseRecordForRuntimeVersion(
+    runtimeVersion: string,
+  ): Promise<Release | null> {
     const { data, error } = await this.supabase
       .from(Tables.RELEASES)
       .select()
@@ -81,7 +88,9 @@ export class SupabaseDatabase implements DatabaseInterface {
       const iosCountNumber = Number(iosCount) || 0;
       const androidCountNumber = Number(androidCount) || 0;
 
-      console.log(`Tracking metrics - iOS: ${iosCountNumber}, Android: ${androidCountNumber}`);
+      console.log(
+        `Tracking metrics - iOS: ${iosCountNumber}, Android: ${androidCountNumber}`,
+      );
 
       return [
         {
@@ -125,7 +134,8 @@ export class SupabaseDatabase implements DatabaseInterface {
       .eq('release_id', releaseId)
       .eq('platform', 'android');
 
-    if (iosError || androidError) throw new Error(iosError?.message || androidError?.message);
+    if (iosError || androidError)
+      throw new Error(iosError?.message || androidError?.message);
 
     return [
       {

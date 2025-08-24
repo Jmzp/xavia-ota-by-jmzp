@@ -51,9 +51,9 @@ describe('Assets API', () => {
       },
     };
 
-    (UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync as jest.Mock).mockResolvedValue(
-      'path/to/update'
-    );
+    (
+      UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync as jest.Mock
+    ).mockResolvedValue('path/to/update');
     (UpdateHelper.getMetadataAsync as jest.Mock).mockResolvedValue(mockMetadata);
     (ZipHelper.getZipFromStorage as jest.Mock).mockResolvedValue({});
     (ZipHelper.getFileFromZip as jest.Mock).mockResolvedValue(Buffer.from('test'));

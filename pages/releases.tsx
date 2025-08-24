@@ -1,21 +1,20 @@
 import {
   Box,
   Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
   Button,
-  Heading,
-  Text,
-  Tag,
-  HStack,
-  Flex,
+  Typography,
+  Chip,
+  Stack,
   IconButton,
   Tooltip,
-} from '@chakra-ui/react';
-import { SlRefresh } from 'react-icons/sl';
+  Paper,
+  TableContainer,
+} from '@mui/material';
+import { Refresh } from '@mui/icons-material';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
 
@@ -49,122 +48,171 @@ export default function ReleasesPage() {
       const data = await response.json();
       setReleases(data.releases);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch releases');
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <ProtectedRoute>
+  const handleRollback = async (path: string) => {
+    try {
+      const response = await fetch('/api/rollback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to rollback');
+      }
+
+      // Refresh releases after rollback
+      fetchReleases();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Rollback failed');
+    }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  if (loading) {
+    return (
       <Layout>
-        <Box mx={4}>
-          <Flex className="flex-col">
-            <HStack>
-              <Heading size="lg">Releases</Heading>
-              <IconButton
-                aria-label="Refresh"
-                onClick={fetchReleases}
-                variant="solid"
-                // colorScheme="blue"
-                size="md"
-                icon={<SlRefresh />}
-              />
-            </HStack>
-
-            {loading && <Text>Loading...</Text>}
-            {error && <Text color="red.500">{error}</Text>}
-
-            {!loading && !error && (
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    <Th>Name</Th>
-                    <Th>Runtime Version</Th>
-                    <Th>Commit Hash</Th>
-                    <Th>Commit Message</Th>
-                    <Th>Timestamp (UTC)</Th>
-                    <Th>File Size</Th>
-                    <Th>Actions</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {releases
-                    .sort(
-                      (a: Release, b: Release) =>
-                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                    )
-                    .map((release: Release, index: number) => {
-                      // Determinar si es el release activo para su runtime version
-                      const releasesForRuntime = releases
-                        .filter((r: Release) => r.runtimeVersion === release.runtimeVersion)
-                        .sort(
-                          (a: Release, b: Release) =>
-                            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-                        );
-                      const isActiveForRuntime = releasesForRuntime[0]?.path === release.path;
-
-                      return (
-                        <Tr key={index}>
-                          <Td>{release.path}</Td>
-                          <Td>
-                            <Tag size="md" colorScheme="blue">
-                              {release.runtimeVersion}
-                            </Tag>
-                          </Td>
-                          <Td>
-                            <Tooltip label={release.commitHash}>
-                              <Text isTruncated w="10rem">
-                                {release.commitHash}
-                              </Text>
-                            </Tooltip>
-                          </Td>
-                          <Td>
-                            <Tooltip label={release.commitMessage}>
-                              <Text isTruncated w="10rem">
-                                {release.commitMessage}
-                              </Text>
-                            </Tooltip>
-                          </Td>
-                          <Td className="min-w-[14rem]">
-                            {moment(release.timestamp).utc().format('MMM, Do  HH:mm')}
-                          </Td>
-                          <Td>{formatFileSize(release.size)}</Td>
-                          <Td justifyItems="center">
-                            {isActiveForRuntime ? (
-                              <Tag size="lg" colorScheme="green">
-                                Active for {release.runtimeVersion}
-                              </Tag>
-                            ) : (
-                              <Button
-                                variant="solid"
-                                colorScheme="orange"
-                                size="sm"
-                                onClick={async () => {
-                                  // TODO: Implement rollback functionality
-                                  console.log('Rollback to:', release.path);
-                                }}>
-                                Rollback to this release
-                              </Button>
-                            )}
-                          </Td>
-                        </Tr>
-                      );
-                    })}
-                </Tbody>
-              </Table>
-            )}
-          </Flex>
-        </Box>
+        <ProtectedRoute>
+          <Typography variant="h4" sx={{ mb: 4 }}>
+            Releases
+          </Typography>
+          <Typography>Loading...</Typography>
+        </ProtectedRoute>
       </Layout>
-    </ProtectedRoute>
-  );
-}
+    );
+  }
 
-function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes';
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  if (error) {
+    return (
+      <Layout>
+        <ProtectedRoute>
+          <Typography variant="h4" sx={{ mb: 4 }}>
+            Releases
+          </Typography>
+          <Typography color="error">Error: {error}</Typography>
+        </ProtectedRoute>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <ProtectedRoute>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          sx={{ mb: 4 }}
+        >
+          <Typography variant="h4">Releases</Typography>
+          <Tooltip title="Refresh">
+            <IconButton onClick={fetchReleases} color="primary">
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+
+        {releases.length === 0 ? (
+          <Paper sx={{ p: 4, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              No releases found. Upload your first release to get started.
+            </Typography>
+          </Paper>
+        ) : (
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Runtime Version</TableCell>
+                  <TableCell>Path</TableCell>
+                  <TableCell>Size</TableCell>
+                  <TableCell>Released</TableCell>
+                  <TableCell>Commit</TableCell>
+                  <TableCell>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {releases.map((release, index) => (
+                  <TableRow key={release.path} hover>
+                    <TableCell>
+                      <Chip
+                        label={release.runtimeVersion}
+                        color="primary"
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                        {release.path}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {formatFileSize(release.size)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {moment(release.timestamp).format('MMM DD, YYYY HH:mm')}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack spacing={1}>
+                        {release.commitHash && (
+                          <Chip
+                            label={release.commitHash.substring(0, 8)}
+                            size="small"
+                            variant="outlined"
+                          />
+                        )}
+                        {release.commitMessage && (
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{
+                              maxWidth: 200,
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {release.commitMessage}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="warning"
+                        onClick={() => handleRollback(release.path)}
+                        disabled={index === 0}
+                      >
+                        Rollback
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </ProtectedRoute>
+    </Layout>
+  );
 }

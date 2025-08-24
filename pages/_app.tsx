@@ -1,12 +1,12 @@
 import { AppProps } from 'next/app';
-import Providers from './ChakraProvider';
+import MUIProvider from '../components/MUIProvider';
 import '../styles/globals.css';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <Providers>
+    <MUIProvider>
       <Component {...pageProps} />
-    </Providers>
+    </MUIProvider>
   );
 }
 

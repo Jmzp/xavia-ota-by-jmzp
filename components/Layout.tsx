@@ -1,14 +1,45 @@
-import { Box, Flex, VStack, Button, FlexProps } from '@chakra-ui/react';
+import { Box, Stack, Button, styled } from '@mui/material';
 import { useRouter } from 'next/router';
-import { FaSignOutAlt, FaTachometerAlt, FaTags } from 'react-icons/fa';
+import { ExitToApp, Dashboard, LocalOffer } from '@mui/icons-material';
 import Image from 'next/image';
 
-export default function Layout({ children, ...props }: { children: React.ReactNode } & FlexProps) {
+const LayoutContainer = styled(Box)(({ theme }) => ({
+  width: '100%',
+  height: '100vh',
+}));
+
+const HeaderBox = styled(Box)(({ theme }) => ({
+  width: '100%',
+  padding: theme.spacing(2),
+  height: '6rem',
+  borderBottom: '2px solid #e2e8f0',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  position: 'relative',
+}));
+
+const SidebarBox = styled(Box)(({ theme }) => ({
+  width: '250px',
+  padding: theme.spacing(2),
+  height: 'calc(100vh - 6rem)',
+  borderRight: '2px solid #e2e8f0',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+}));
+
+const ContentBox = styled(Box)(({ theme }) => ({
+  flex: 1,
+  padding: theme.spacing(4),
+}));
+
+export default function Layout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <FaTachometerAlt fontSize="1.25rem" /> },
-    { name: 'Releases', path: '/releases', icon: <FaTags fontSize="1.25rem" /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <Dashboard /> },
+    { name: 'Releases', path: '/releases', icon: <LocalOffer /> },
   ];
 
   const handleLogout = () => {
@@ -17,15 +48,8 @@ export default function Layout({ children, ...props }: { children: React.ReactNo
   };
 
   return (
-    <Box className="w-full" height="100vh" {...props}>
-      <Box
-        w="full"
-        p={4}
-        className=" text-white h-[6rem] border-b-gray-200 border-b-2"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        position="relative">
+    <LayoutContainer>
+      <HeaderBox>
         <Box>
           <Image
             src="/xavia_logo.png"
@@ -35,42 +59,34 @@ export default function Layout({ children, ...props }: { children: React.ReactNo
             alt="Xavia Logo"
           />
         </Box>
-      </Box>
-      <Flex className="h-[calc(100vh-6rem)] ">
-        <Box
-          w="250px"
-          p={4}
-          className="h-full border-r-gray-200 border-r-2"
-          display="flex"
-          flexDirection="column"
-          justifyContent="space-between">
-          <VStack spacing={4} align="stretch">
+      </HeaderBox>
+      <Box display="flex" height="calc(100vh - 6rem)">
+        <SidebarBox>
+          <Stack spacing={2}>
             {navItems.map((item) => (
               <Button
                 key={item.path}
-                variant={router.pathname === item.path ? 'solid' : 'ghost'}
-                colorScheme={router.pathname === item.path ? 'primary' : 'gray'}
-                rightIcon={item.icon}
+                variant={router.pathname === item.path ? 'contained' : 'text'}
+                color={router.pathname === item.path ? 'primary' : 'inherit'}
+                startIcon={item.icon}
                 onClick={() => router.push(item.path)}
-                justifyContent="space-between">
-                <Box flex="1" textAlign="left">
-                  {item.name}
-                </Box>
+                sx={{ justifyContent: 'flex-start' }}
+              >
+                {item.name}
               </Button>
             ))}
-          </VStack>
+          </Stack>
           <Button
-            variant="outline"
-            colorScheme="red"
+            variant="outlined"
+            color="error"
             onClick={handleLogout}
-            rightIcon={<FaSignOutAlt />}>
+            startIcon={<ExitToApp />}
+          >
             Logout
           </Button>
-        </Box>
-        <Box flex={1} p={8}>
-          {children}
-        </Box>
-      </Flex>
-    </Box>
+        </SidebarBox>
+        <ContentBox>{children}</ContentBox>
+      </Box>
+    </LayoutContainer>
   );
 }

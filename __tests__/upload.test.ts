@@ -91,8 +91,15 @@ describe('Upload API', () => {
       commitMessage: 'Test commit message',
       updateId: mockUpdateId,
     });
-    expect(ZipHelper.getFileFromZip).toHaveBeenCalledWith(mockZipFolder, 'metadata.json');
-    expect(HashHelper.createHash).toHaveBeenCalledWith(mockMetadataContent, 'sha256', 'hex');
+    expect(ZipHelper.getFileFromZip).toHaveBeenCalledWith(
+      mockZipFolder,
+      'metadata.json',
+    );
+    expect(HashHelper.createHash).toHaveBeenCalledWith(
+      mockMetadataContent,
+      'sha256',
+      'hex',
+    );
     expect(HashHelper.convertSHA256HashToUUID).toHaveBeenCalledWith(mockHash);
   });
 

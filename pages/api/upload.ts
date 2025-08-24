@@ -17,7 +17,10 @@ export const config = {
   },
 };
 
-export default async function uploadHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function uploadHandler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   const logger = getLogger('api/upload');
 
   if (req.method !== 'POST') {
@@ -40,7 +43,9 @@ export default async function uploadHandler(req: NextApiRequest, res: NextApiRes
         hasRuntimeVersion: !!runtimeVersion,
         hasCommitHash: !!commitHash,
       });
-      res.status(400).json({ error: 'Missing file, runtime version, or commit hash' });
+      res
+        .status(400)
+        .json({ error: 'Missing file, runtime version, or commit hash' });
       return;
     }
 
@@ -58,12 +63,18 @@ export default async function uploadHandler(req: NextApiRequest, res: NextApiRes
     // Store the zipped file as is
     const zipContent = fs.readFileSync(file.filepath);
     const zipFolder = new AdmZip(file.filepath);
-    const metadataJsonFile = await ZipHelper.getFileFromZip(zipFolder, 'metadata.json');
+    const metadataJsonFile = await ZipHelper.getFileFromZip(
+      zipFolder,
+      'metadata.json',
+    );
 
     const updateHash = HashHelper.createHash(metadataJsonFile, 'sha256', 'hex');
     const updateId = HashHelper.convertSHA256HashToUUID(updateHash);
 
-    const path = await storage.uploadFile(`${updatePath}/${timestamp}.zip`, zipContent);
+    const path = await storage.uploadFile(
+      `${updatePath}/${timestamp}.zip`,
+      zipContent,
+    );
 
     await DatabaseFactory.getDatabase().createRelease({
       path,

@@ -69,7 +69,7 @@ export class LocalStorage implements StorageInterface {
               mimetype: this.getMimeType(path.extname(file)),
             },
           };
-        })
+        }),
       );
       return fileStats;
     } catch {
@@ -81,7 +81,9 @@ export class LocalStorage implements StorageInterface {
     const fullPath = path.join(this.baseDir, directory);
     try {
       const entries = await fs.readdir(fullPath, { withFileTypes: true });
-      return entries.filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+      return entries
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
     } catch {
       return [];
     }

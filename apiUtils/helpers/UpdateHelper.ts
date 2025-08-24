@@ -25,7 +25,7 @@ export type GetAssetMetadataArg =
 
 export class UpdateHelper {
   static async getLatestUpdateBundlePathForRuntimeVersionAsync(
-    runtimeVersion: string
+    runtimeVersion: string,
   ): Promise<string> {
     const storage = StorageFactory.getStorage();
     const updatesDirectoryForRuntimeVersion = `updates/${runtimeVersion}`;
@@ -36,13 +36,19 @@ export class UpdateHelper {
 
     const zipFiles = (await storage.listFiles(updatesDirectoryForRuntimeVersion))
       .filter((file) => file.name.endsWith('.zip'))
-      .sort((a, b) => parseInt(b.name.split('.')[0], 10) - parseInt(a.name.split('.')[0], 10));
+      .sort(
+        (a, b) =>
+          parseInt(b.name.split('.')[0], 10) - parseInt(a.name.split('.')[0], 10),
+      );
 
     if (!zipFiles.length) {
       throw new Error(`No updates found for runtime version: ${runtimeVersion}`);
     }
 
-    return `${updatesDirectoryForRuntimeVersion}/${zipFiles[0].name.replace('.zip', '')}`;
+    return `${updatesDirectoryForRuntimeVersion}/${zipFiles[0].name.replace(
+      '.zip',
+      '',
+    )}`;
   }
 
   static async getAssetMetadataAsync(arg: GetAssetMetadataArg) {
@@ -50,11 +56,13 @@ export class UpdateHelper {
     const asset = await ZipHelper.getFileFromZip(zip, arg.filePath);
 
     const assetHash = HashHelper.getBase64URLEncoding(
-      HashHelper.createHash(asset, 'sha256', 'base64')
+      HashHelper.createHash(asset, 'sha256', 'base64'),
     );
     const key = HashHelper.createHash(asset, 'md5', 'hex');
     const keyExtensionSuffix = arg.isLaunchAsset ? 'bundle' : arg.ext;
-    const contentType = arg.isLaunchAsset ? 'application/javascript' : mime.getType(arg.ext);
+    const contentType = arg.isLaunchAsset
+      ? 'application/javascript'
+      : mime.getType(arg.ext);
 
     return {
       hash: assetHash,
@@ -83,7 +91,9 @@ export class UpdateHelper {
         id: HashHelper.createHash(metadataBuffer, 'sha256', 'hex'),
       };
     } catch (error) {
-      throw new Error(`No metadata found with runtime version: ${runtimeVersion}. Error: ${error}`);
+      throw new Error(
+        `No metadata found with runtime version: ${runtimeVersion}. Error: ${error}`,
+      );
     }
   }
 

@@ -6,7 +6,10 @@ import { serializeDictionary } from 'structured-headers';
 import { ConfigHelper } from '../../apiUtils/helpers/ConfigHelper';
 import { DictionaryHelper } from '../../apiUtils/helpers/DictionaryHelper';
 import { HashHelper } from '../../apiUtils/helpers/HashHelper';
-import { UpdateHelper, NoUpdateAvailableError } from '../../apiUtils/helpers/UpdateHelper';
+import {
+  UpdateHelper,
+  NoUpdateAvailableError,
+} from '../../apiUtils/helpers/UpdateHelper';
 import { ZipHelper } from '../../apiUtils/helpers/ZipHelper';
 import { getLogger } from '../../apiUtils/logger';
 import { DatabaseFactory } from '../../apiUtils/database/DatabaseFactory';
@@ -14,7 +17,10 @@ import moment from 'moment';
 
 const logger = getLogger('manifest');
 
-export default async function manifestEndpoint(req: NextApiRequest, res: NextApiResponse) {
+export default async function manifestEndpoint(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== 'GET') {
     res.statusCode = 405;
     res.json({ error: 'Expected GET.' });
@@ -49,7 +55,8 @@ export default async function manifestEndpoint(req: NextApiRequest, res: NextApi
     return;
   }
 
-  const runtimeVersion = req.headers['expo-runtime-version'] ?? req.query['runtime-version'];
+  const runtimeVersion =
+    req.headers['expo-runtime-version'] ?? req.query['runtime-version'];
   if (!runtimeVersion || typeof runtimeVersion !== 'string') {
     res.statusCode = 400;
     res.json({
@@ -59,16 +66,21 @@ export default async function manifestEndpoint(req: NextApiRequest, res: NextApi
   }
 
   const database = DatabaseFactory.getDatabase();
-  const releaseRecord = await database.getLatestReleaseRecordForRuntimeVersion(runtimeVersion);
+  const releaseRecord = await database.getLatestReleaseRecordForRuntimeVersion(
+    runtimeVersion,
+  );
 
   if (releaseRecord) {
     const updateId = releaseRecord.updateId;
 
     const currentUpdateId = req.headers['expo-current-update-id'];
     if (currentUpdateId === updateId) {
-      logger.info('User is already running the latest release. Returning NoUpdateAvailable.', {
-        runtimeVersion,
-      });
+      logger.info(
+        'User is already running the latest release. Returning NoUpdateAvailable.',
+        {
+          runtimeVersion,
+        },
+      );
       await putNoUpdateAvailableInResponseAsync(req, res, protocolVersion);
       return;
     }
@@ -76,9 +88,10 @@ export default async function manifestEndpoint(req: NextApiRequest, res: NextApi
 
   let updateBundlePath: string;
   try {
-    updateBundlePath = await UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync(
-      runtimeVersion
-    );
+    updateBundlePath =
+      await UpdateHelper.getLatestUpdateBundlePathForRuntimeVersionAsync(
+        runtimeVersion,
+      );
   } catch (error: any) {
     if (error instanceof NoUpdateAvailableError) {
       logger.info('No update available for runtime version', { runtimeVersion });
@@ -105,11 +118,16 @@ export default async function manifestEndpoint(req: NextApiRequest, res: NextApi
           updateBundlePath,
           runtimeVersion,
           platform,
-          protocolVersion
+          protocolVersion,
         );
       } else if (updateType === UpdateType.ROLLBACK) {
         logger.info('Rollback is available.');
-        await putRollBackInResponseAsync(req, res, updateBundlePath, protocolVersion);
+        await putRollBackInResponseAsync(
+          req,
+          res,
+          updateBundlePath,
+          protocolVersion,
+        );
       }
     } catch (maybeNoUpdateAvailableError) {
       if (maybeNoUpdateAvailableError instanceof NoUpdateAvailableError) {
@@ -143,7 +161,7 @@ async function putUpdateInResponseAsync(
   updateBundlePath: string,
   runtimeVersion: string,
   platform: string,
-  protocolVersion: number
+  protocolVersion: number,
 ): Promise<void> {
   const currentUpdateId = req.headers['expo-current-update-id'];
   const { metadataJson, createdAt, id } = await UpdateHelper.getMetadataAsync({
@@ -153,7 +171,10 @@ async function putUpdateInResponseAsync(
 
   // NoUpdateAvailable directive only supported on protocol version 1
   // for protocol version 0, serve most recent update as normal
-  if (currentUpdateId === HashHelper.convertSHA256HashToUUID(id) && protocolVersion === 1) {
+  if (
+    currentUpdateId === HashHelper.convertSHA256HashToUUID(id) &&
+    protocolVersion === 1
+  ) {
     logger.info('returning NoUpdateAvailable to client');
     throw new NoUpdateAvailableError();
   }
@@ -176,8 +197,8 @@ async function putUpdateInResponseAsync(
           runtimeVersion,
           platform,
           isLaunchAsset: false,
-        })
-      )
+        }),
+      ),
     ),
     launchAsset: await UpdateHelper.getAssetMetadataAsync({
       updateBundlePath,
@@ -257,7 +278,7 @@ async function putRollBackInResponseAsync(
   req: NextApiRequest,
   res: NextApiResponse,
   updateBundlePath: string,
-  protocolVersion: number
+  protocolVersion: number,
 ): Promise<void> {
   if (protocolVersion === 0) {
     logger.error('Rollbacks not supported on protocol version 0');
@@ -276,7 +297,9 @@ async function putRollBackInResponseAsync(
     throw new NoUpdateAvailableError();
   }
 
-  const directive = await UpdateHelper.createRollBackDirectiveAsync(updateBundlePath);
+  const directive = await UpdateHelper.createRollBackDirectiveAsync(
+    updateBundlePath,
+  );
 
   let signature = null;
   const expectSignatureHeader = req.headers['expo-expect-signature'];
@@ -319,10 +342,12 @@ async function putRollBackInResponseAsync(
 async function putNoUpdateAvailableInResponseAsync(
   req: NextApiRequest,
   res: NextApiResponse,
-  protocolVersion: number
+  protocolVersion: number,
 ): Promise<void> {
   if (protocolVersion === 0) {
-    throw new Error('NoUpdateAvailable directive not available in protocol version 0');
+    throw new Error(
+      'NoUpdateAvailable directive not available in protocol version 0',
+    );
   }
 
   const directive = await UpdateHelper.createNoUpdateAvailableDirectiveAsync();

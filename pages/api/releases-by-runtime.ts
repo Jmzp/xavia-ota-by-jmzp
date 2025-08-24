@@ -14,7 +14,10 @@ interface RuntimeSummary {
   totalReleases: number;
 }
 
-export default async function releasesByRuntimeHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function releasesByRuntimeHandler(
+  req: NextApiRequest,
+  res: NextApiResponse,
+) {
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -24,7 +27,8 @@ export default async function releasesByRuntimeHandler(req: NextApiRequest, res:
     const storage = StorageFactory.getStorage();
     const directories = await storage.listDirectories('updates/');
 
-    const releasesWithCommitHash = await DatabaseFactory.getDatabase().listReleases();
+    const releasesWithCommitHash =
+      await DatabaseFactory.getDatabase().listReleases();
 
     const runtimeSummaries: RuntimeSummary[] = [];
 
@@ -36,7 +40,9 @@ export default async function releasesByRuntimeHandler(req: NextApiRequest, res:
       // Get releases for this runtime version
       const runtimeReleases = [];
       for (const file of files) {
-        const release = releasesWithCommitHash.find((r) => r.path === `${folderPath}/${file.name}`);
+        const release = releasesWithCommitHash.find(
+          (r) => r.path === `${folderPath}/${file.name}`,
+        );
         runtimeReleases.push({
           path: release?.path || `${folderPath}/${file.name}`,
           runtimeVersion,
@@ -49,7 +55,7 @@ export default async function releasesByRuntimeHandler(req: NextApiRequest, res:
 
       // Sort by timestamp to get the most recent (active) release
       runtimeReleases.sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
 
       const activeRelease = runtimeReleases[0] || null;
