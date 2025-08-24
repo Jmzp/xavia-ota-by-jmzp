@@ -1,11 +1,10 @@
-# Xavia OTA Updates Server 
+# Xavia OTA Updates Server - JMZP Fork
 
-[![Tests](https://github.com/xavia-io/xavia-ota/actions/workflows/test.yml/badge.svg)](https://github.com/xavia-io/xavia-ota/actions/workflows/test.yml)
-[![Docker Pulls](https://img.shields.io/docker/pulls/xaviaio/xavia-ota)](https://hub.docker.com/r/xaviaio/xavia-ota)
-[![Docker Image Size](https://img.shields.io/docker/image-size/xaviaio/xavia-ota/latest)](https://hub.docker.com/r/xaviaio/xavia-ota)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 A self-hosted Over-The-Air (OTA) updates server for Expo/RN applications that gives you complete control over your app's update distribution. Built with Next.js and TypeScript, it implements the expo-updates protocol while providing additional features for enterprise use.
+
+**This is a personal fork by Jorge Zapata Parra (JMZP) with enhanced features and optimizations.**
 
 ## Table of Contents <!-- omit in toc -->
 
@@ -47,38 +46,48 @@ This system provides a robust OTA update infrastructure with these key component
 
 ## Key Features
 
-- ✨ Full compatibility with `expo-updates` protocol - Seamlessly integrates with Expo applications using the standard update protocol.
+- ✨ **Full compatibility with `expo-updates` protocol** - Seamlessly integrates with Expo applications using the standard update protocol.
 
-- 🔄 Runtime version management and rollback support - Manage different app versions and quickly rollback to previous versions if issues arise.
+- 🔄 **Runtime version management and rollback support** - Manage different app versions and quickly rollback to previous versions if issues arise.
 
-- 🐳 Docker support for easy deployment - Get up and running quickly with containerized deployment using Docker and Docker Compose.
+- 🐳 **Docker support for easy deployment** - Get up and running quickly with containerized deployment using Docker and Docker Compose.
 
-- 🗄️ Multiple blob storage backends:
-  Abstracted blob storage interface that allows you to plug in your own storage solutions. Implement the simple interface to integrate with any storage backend of your choice.
+- 🗄️ **Multiple blob storage backends** - Abstracted blob storage interface supporting Local, Supabase, and Google Cloud Storage. Easy to extend for other providers.
 
-- 📈 Release history tracking - Keep track of all your releases with detailed metadata including timestamps, commit hashes and commit messages.
+- 📈 **Release history tracking** - Keep track of all your releases with detailed metadata including timestamps, commit hashes and commit messages.
 
-- 📊 Insights - Get insights into your update distribution with detailed analytics.
+- 📊 **Insights and analytics** - Get insights into your update distribution with detailed analytics.
+
+- 🚀 **Enhanced performance monitoring** - Advanced logging and monitoring for large asset delivery with automatic warnings for files >4MB.
+
+- 🔧 **Optimized asset delivery** - Improved caching headers and performance optimizations for better user experience.
+
+- 🛡️ **Production-ready enhancements** - Enhanced error handling, structured logging, and better debugging capabilities.
 
 
 ## Deployment
 
-The easiest way to deploy Xavia OTA is using our public Docker image. The image is available on Docker Hub at [xaviaio/xavia-ota](https://hub.docker.com/repository/docker/xaviaio/xavia-ota).
+The easiest way to deploy this fork is by building from source or using the provided Docker configuration.
 
-1. You can copy the `docker-compose.yml` file in the `containers/prod` folder and set the environment variables properly. 
-2. Or if you like the longer route, you can pull the image and run it manually
+### Option 1: Docker Compose (Recommended)
+1. Copy the `docker-compose.yml` file from the `containers/prod` folder
+2. Configure your environment variables (see configuration section below)
+3. Run: `docker-compose up -d`
 
-    ` docker run -d -p 3000:3000 xaviaio/xavia-ota -e HOST=http://localhost:3000 ...`
+### Option 2: Build from Source
+1. Clone this repository
+2. Configure your `.env.local` file
+3. Run: `npm run build && npm start`
 
 ### Load test your deployment setup
 Check [this](./docs/laod_testing.md) on how to run load testing for your OTA server in your deployment infrastructure.
 
 ## Local Development
 
-1. Clone the repository and install dependencies:
+1. Clone this fork and install dependencies:
    ```bash
-   git clone git@github.com:xavia-io/xavia-ota.git
-   cd xavia-ota
+   git clone https://github.com/jmzp/xavia-ota-by-jmzp.git
+   cd xavia-ota-by-jmzp
    npm install
    ```
 
@@ -99,6 +108,14 @@ Check [this](./docs/laod_testing.md) on how to run load testing for your OTA ser
    POSTGRES_DB=releases_db
    POSTGRES_HOST=localhost
    POSTGRES_PORT=5432
+   ```
+
+   **For Supabase Storage (Recommended for production):**
+   ```env
+   BLOB_STORAGE_TYPE=supabase
+   SUPABASE_URL=your-supabase-url
+   SUPABASE_ANON_KEY=your-supabase-anon-key
+   SUPABASE_BUCKET_NAME=your-bucket-name
    ```
 
 4. Start the development server:
@@ -172,10 +189,17 @@ For more information about the admin dashboard, please refer to the [Admin Dashb
 - **Container**: Docker & Docker Compose
 
 ### Storage Options
-- Local filesystem storage for development
-- Supabase storage for production deployments
+- **Local filesystem storage** - Perfect for development and testing
+- **Supabase storage** - Recommended for production deployments with automatic scaling
+- **Google Cloud Storage (GCS)** - Enterprise-grade storage solution
   
 Read more about supported blob storage and database options [here](./docs/supportedStorageAlternatives.md).
+
+### Recent Enhancements
+- **Improved asset delivery performance** with optimized caching headers
+- **Advanced monitoring** for large file transfers with automatic warnings
+- **Enhanced error handling** with structured logging using Winston
+- **Better debugging capabilities** with detailed request/response logging
 
 
 
@@ -186,17 +210,26 @@ Read more about supported blob storage and database options [here](./docs/suppor
 - Make for development scripts
 
 
-## Community Contributions
+## About This Fork
 
-We welcome and appreciate contributions from the community to enhance and expand the capabilities of the Xavia OTA System. Here are some areas where you can contribute:
+This fork is maintained by **Jorge Zapata Parra (JMZP)** and includes several enhancements over the original Xavia OTA:
 
-- **New Storage Backends**: Implement additional storage backends to provide more options for users.
-- **Database Support**: Add support for other databases like MySQL, MongoDB, etc.
-- **UI Enhancements**: Improve the Admin Dashboard with new features and better user experience.
-- **Documentation**: Help us improve the documentation to make it easier for others to get started and use the system.
-- **Bug Fixes and Improvements**: Identify and fix bugs, and suggest improvements to the existing codebase.
+### Enhanced Features:
+- **Performance monitoring** - Automatic detection and logging of large asset transfers
+- **Improved caching** - Better cache headers for optimal performance
+- **Enhanced logging** - Structured logging with Winston for better debugging
+- **Production optimizations** - Various improvements for production deployments
+- **Supabase integration** - Enhanced support for Supabase storage
 
-Feel free to fork the repository, make your changes, and submit a pull request. We look forward to your contributions!
+### Contributions
+Contributions to this fork are welcome! Areas of interest:
+- **Additional storage backends** (AWS S3, Azure Blob, etc.)
+- **Database alternatives** (MySQL, MongoDB)
+- **UI/UX improvements** for the admin dashboard
+- **Performance optimizations**
+- **Documentation improvements**
+
+Feel free to open issues or submit pull requests.
 
 ## FAQ
 
