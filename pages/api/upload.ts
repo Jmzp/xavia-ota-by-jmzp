@@ -5,6 +5,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import { DatabaseFactory } from '../../apiUtils/database/DatabaseFactory';
 import { StorageFactory } from '../../apiUtils/storage/StorageFactory';
+import { getLogger } from '../../apiUtils/logger';
 
 import AdmZip from 'adm-zip';
 import { ZipHelper } from '../../apiUtils/helpers/ZipHelper';
@@ -17,6 +18,8 @@ export const config = {
 };
 
 export default async function uploadHandler(req: NextApiRequest, res: NextApiResponse) {
+  const logger = getLogger('api/upload');
+
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -32,9 +35,21 @@ export default async function uploadHandler(req: NextApiRequest, res: NextApiRes
     const commitMessage = fields.commitMessage?.[0] || 'No message provided';
 
     if (!file || !runtimeVersion || !commitHash) {
+      logger.warn('Upload attempt with missing required fields', {
+        hasFile: !!file,
+        hasRuntimeVersion: !!runtimeVersion,
+        hasCommitHash: !!commitHash,
+      });
       res.status(400).json({ error: 'Missing file, runtime version, or commit hash' });
       return;
     }
+
+    logger.info('Starting file upload', {
+      fileName: file.originalFilename,
+      fileSize: file.size,
+      runtimeVersion,
+      commitHash: commitHash.substring(0, 8),
+    });
 
     const storage = StorageFactory.getStorage();
     const timestamp = moment().utc().format('YYYYMMDDHHmmss');
@@ -59,9 +74,19 @@ export default async function uploadHandler(req: NextApiRequest, res: NextApiRes
       updateId,
     });
 
+    logger.info('File upload completed successfully', {
+      path,
+      runtimeVersion,
+      updateId,
+      commitHash: commitHash.substring(0, 8),
+    });
+
     res.status(200).json({ success: true, path });
   } catch (error) {
-    console.error('Upload error:', error);
+    logger.error('File upload failed', {
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     res.status(500).json({ error: 'Upload failed' });
   }
 }

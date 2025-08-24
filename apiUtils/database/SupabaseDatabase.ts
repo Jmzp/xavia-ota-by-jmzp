@@ -82,7 +82,7 @@ export class SupabaseDatabase implements DatabaseInterface {
       const androidCountNumber = Number(androidCount) || 0;
 
       console.log(`Tracking metrics - iOS: ${iosCountNumber}, Android: ${androidCountNumber}`);
-      
+
       return [
         {
           platform: 'ios',

@@ -6,28 +6,21 @@ import {
   Tr,
   Th,
   Td,
-  Text,
-  Heading,
   Button,
+  Heading,
+  Text,
   Tag,
   HStack,
-  IconButton,
-  AlertDialogHeader,
-  AlertDialogContent,
-  AlertDialogOverlay,
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogFooter,
   Flex,
+  IconButton,
   Tooltip,
 } from '@chakra-ui/react';
-import moment from 'moment';
-import { useEffect, useRef, useState } from 'react';
 import { SlRefresh } from 'react-icons/sl';
+import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 import Layout from '../components/Layout';
 import ProtectedRoute from '../components/ProtectedRoute';
-import { showToast } from '../components/toast';
 
 interface Release {
   path: string;
@@ -42,9 +35,6 @@ export default function ReleasesPage() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedRelease, setSelectedRelease] = useState<Release | null>(null);
-  const cancelRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     fetchReleases();
@@ -101,116 +91,66 @@ export default function ReleasesPage() {
                 <Tbody>
                   {releases
                     .sort(
-                      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                      (a: Release, b: Release) =>
+                        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
                     )
-                    .map((release, index) => (
-                      <Tr key={index}>
-                        <Td>{release.path}</Td>
-                        <Td>{release.runtimeVersion}</Td>
-                        <Td>
-                          <Tooltip label={release.commitHash}>
-                            <Text isTruncated w="10rem">
-                              {release.commitHash}
-                            </Text>
-                          </Tooltip>
-                        </Td>
-                        <Td>
-                          <Tooltip label={release.commitMessage}>
-                            <Text isTruncated w="10rem">
-                              {release.commitMessage}
-                            </Text>
-                          </Tooltip>
-                        </Td>
-                        <Td className="min-w-[14rem]">
-                          {moment(release.timestamp).utc().format('MMM, Do  HH:mm')}
-                        </Td>
-                        <Td>{formatFileSize(release.size)}</Td>
-                        <Td justifyItems="center">
-                          {index === 0 ? (
-                            <Tag size="lg" colorScheme="green">
-                              Active Release
+                    .map((release: Release, index: number) => {
+                      // Determinar si es el release activo para su runtime version
+                      const releasesForRuntime = releases
+                        .filter((r: Release) => r.runtimeVersion === release.runtimeVersion)
+                        .sort(
+                          (a: Release, b: Release) =>
+                            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+                        );
+                      const isActiveForRuntime = releasesForRuntime[0]?.path === release.path;
+
+                      return (
+                        <Tr key={index}>
+                          <Td>{release.path}</Td>
+                          <Td>
+                            <Tag size="md" colorScheme="blue">
+                              {release.runtimeVersion}
                             </Tag>
-                          ) : (
-                            <Button
-                              variant="solid"
-                              colorScheme="orange"
-                              size="sm"
-                              onClick={async () => {
-                                setIsOpen(true);
-                                setSelectedRelease(release);
-                              }}>
-                              <AlertDialog
-                                isOpen={isOpen}
-                                leastDestructiveRef={cancelRef}
-                                onClose={() => setIsOpen(false)}
-                                isCentered>
-                                <AlertDialogOverlay>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader fontSize="lg" fontWeight="bold">
-                                      Rollback Release
-                                    </AlertDialogHeader>
-
-                                    <AlertDialogBody>
-                                      Are you sure you want to rollback to this release?
-                                      <Tag
-                                        size="lg"
-                                        colorScheme="green"
-                                        mt={4}
-                                        padding={4}
-                                        className="w-full">
-                                        <Text fontSize="sm">
-                                          Commit Hash: {selectedRelease?.commitHash}
-                                        </Text>
-                                      </Tag>
-                                      <Tag size="lg" colorScheme="orange" mt={4} padding={4}>
-                                        <Text fontSize="sm">
-                                          This will promote this release to be the active release
-                                          with a new timestamp.
-                                        </Text>
-                                      </Tag>
-                                    </AlertDialogBody>
-
-                                    <AlertDialogFooter>
-                                      <Button ref={cancelRef} onClick={() => setIsOpen(false)}>
-                                        Cancel
-                                      </Button>
-                                      <Button
-                                        colorScheme="red"
-                                        onClick={async () => {
-                                          const response = await fetch('/api/rollback', {
-                                            method: 'POST',
-                                            headers: {
-                                              'Content-Type': 'application/json',
-                                            },
-                                            body: JSON.stringify({
-                                              path: selectedRelease?.path,
-                                              runtimeVersion: selectedRelease?.runtimeVersion,
-                                              commitHash: selectedRelease?.commitHash,
-                                              commitMessage: selectedRelease?.commitMessage,
-                                            }),
-                                          });
-
-                                          if (!response.ok) {
-                                            throw new Error('Rollback failed');
-                                          }
-
-                                          showToast('Rollback successful', 'success');
-                                          fetchReleases();
-                                          setIsOpen(false);
-                                        }}
-                                        ml={3}>
-                                        Rollback
-                                      </Button>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialogOverlay>
-                              </AlertDialog>
-                              Rollback to this release
-                            </Button>
-                          )}
-                        </Td>
-                      </Tr>
-                    ))}
+                          </Td>
+                          <Td>
+                            <Tooltip label={release.commitHash}>
+                              <Text isTruncated w="10rem">
+                                {release.commitHash}
+                              </Text>
+                            </Tooltip>
+                          </Td>
+                          <Td>
+                            <Tooltip label={release.commitMessage}>
+                              <Text isTruncated w="10rem">
+                                {release.commitMessage}
+                              </Text>
+                            </Tooltip>
+                          </Td>
+                          <Td className="min-w-[14rem]">
+                            {moment(release.timestamp).utc().format('MMM, Do  HH:mm')}
+                          </Td>
+                          <Td>{formatFileSize(release.size)}</Td>
+                          <Td justifyItems="center">
+                            {isActiveForRuntime ? (
+                              <Tag size="lg" colorScheme="green">
+                                Active for {release.runtimeVersion}
+                              </Tag>
+                            ) : (
+                              <Button
+                                variant="solid"
+                                colorScheme="orange"
+                                size="sm"
+                                onClick={async () => {
+                                  // TODO: Implement rollback functionality
+                                  console.log('Rollback to:', release.path);
+                                }}>
+                                Rollback to this release
+                              </Button>
+                            )}
+                          </Td>
+                        </Tr>
+                      );
+                    })}
                 </Tbody>
               </Table>
             )}
