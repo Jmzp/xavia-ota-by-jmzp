@@ -189,7 +189,7 @@ For more information about the admin dashboard, please refer to the [Admin Dashb
 - **Framework**: Next.js 15+
 - **Language**: TypeScript
 - **Database**: PostgreSQL 14
-- **UI Library**: Material-UI (MUI) v6 and Tailwind CSS for styling
+- **UI Library**: Material-UI (MUI) v6 for styling and components
 - **Container**: Docker & Docker Compose
 
 ### Storage Options
