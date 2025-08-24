@@ -20,11 +20,25 @@ export default async function allTrackingHandler(req: NextApiRequest, res: NextA
 
   try {
     const database = DatabaseFactory.getDatabase();
+
+    logger.info('Fetching tracking metrics...');
     const trackings = await database.getReleaseTrackingMetricsForAllReleases();
+    logger.info(`Retrieved ${trackings.length} tracking metrics:`, trackings);
+
+    logger.info('Fetching releases...');
     const releases = await database.listReleases();
-    res.status(200).json({ trackings, totalReleases: releases.length });
+    logger.info(`Retrieved ${releases.length} releases`);
+
+    const response = { trackings, totalReleases: releases.length };
+    logger.info('Sending response:', response);
+
+    res.status(200).json(response);
   } catch (error) {
-    logger.error(error);
-    res.status(500).json({ error: 'Failed to fetch tracking data' });
+    logger.error('Error in allTrackingHandler:', error);
+    console.error('Error in allTrackingHandler:', error);
+    res.status(500).json({
+      error: 'Failed to fetch tracking data',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 }

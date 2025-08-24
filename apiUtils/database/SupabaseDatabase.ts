@@ -56,27 +56,47 @@ export class SupabaseDatabase implements DatabaseInterface {
   }
 
   async getReleaseTrackingMetricsForAllReleases(): Promise<TrackingMetrics[]> {
-    const { count: iosCount, error: iosError } = await this.supabase
-      .from(Tables.RELEASES_TRACKING)
-      .select('platform', { count: 'estimated', head: true })
-      .eq('platform', 'ios');
+    try {
+      // Use exact count instead of estimated for more reliable results
+      const { count: iosCount, error: iosError } = await this.supabase
+        .from(Tables.RELEASES_TRACKING)
+        .select('*', { count: 'exact', head: true })
+        .eq('platform', 'ios');
 
-    const { count: androidCount, error: androidError } = await this.supabase
-      .from(Tables.RELEASES_TRACKING)
-      .select('platform', { count: 'estimated', head: true })
-      .eq('platform', 'android');
+      const { count: androidCount, error: androidError } = await this.supabase
+        .from(Tables.RELEASES_TRACKING)
+        .select('*', { count: 'exact', head: true })
+        .eq('platform', 'android');
 
-    if (iosError || androidError) throw new Error(iosError?.message || androidError?.message);
-    return [
-      {
-        platform: 'ios',
-        count: Number(iosCount),
-      },
-      {
-        platform: 'android',
-        count: Number(androidCount),
-      },
-    ];
+      if (iosError) {
+        console.error('iOS count error:', iosError);
+        throw new Error(`iOS tracking query failed: ${iosError.message}`);
+      }
+
+      if (androidError) {
+        console.error('Android count error:', androidError);
+        throw new Error(`Android tracking query failed: ${androidError.message}`);
+      }
+
+      const iosCountNumber = Number(iosCount) || 0;
+      const androidCountNumber = Number(androidCount) || 0;
+
+      console.log(`Tracking metrics - iOS: ${iosCountNumber}, Android: ${androidCountNumber}`);
+      
+      return [
+        {
+          platform: 'ios',
+          count: iosCountNumber,
+        },
+        {
+          platform: 'android',
+          count: androidCountNumber,
+        },
+      ];
+    } catch (error) {
+      console.error('Error fetching tracking metrics:', error);
+      throw error;
+    }
   }
   async createTracking(tracking: Omit<Tracking, 'id'>): Promise<Tracking> {
     const { data, error } = await this.supabase
