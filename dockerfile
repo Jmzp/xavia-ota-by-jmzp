@@ -34,6 +34,8 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next
+
 # Create uploads directory for local storage
 RUN mkdir -p /app/uploads && chown nextjs:nodejs /app/uploads
 
