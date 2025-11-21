@@ -30,24 +30,25 @@ export class SupabaseDatabase implements DatabaseInterface {
       .select()
       .eq('runtime_version', runtimeVersion)
       .order('timestamp', { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1);
 
-    if (error) throw new Error(error.message);
+    if (error) throw error;
 
-    if (data) {
-      return {
-        id: data.id,
-        runtimeVersion: data.runtime_version,
-        path: data.path,
-        timestamp: data.timestamp,
-        commitHash: data.commit_hash,
-        commitMessage: data.commit_message,
-        updateId: data.update_id,
-      };
+    if (!data || data.length === 0) {
+      return null;
     }
 
-    return null;
+    const latest = data[0];
+
+    return {
+      id: latest.id,
+      runtimeVersion: latest.runtime_version,
+      path: latest.path,
+      timestamp: latest.timestamp,
+      commitHash: latest.commit_hash,
+      commitMessage: latest.commit_message,
+      updateId: latest.update_id,
+    };
   }
 
   async getReleaseByPath(path: string): Promise<Release | null> {
