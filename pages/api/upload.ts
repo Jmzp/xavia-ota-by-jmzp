@@ -35,7 +35,11 @@ export default async function uploadHandler(
     const file = files.file?.[0];
     const runtimeVersion = fields.runtimeVersion?.[0];
     const commitHash = fields.commitHash?.[0];
-    const commitMessage = fields.commitMessage?.[0] || 'No message provided';
+    let commitMessage = fields.commitMessage?.[0] || 'No message provided';
+
+    if (commitMessage.length > 250) {
+      commitMessage = commitMessage.substring(0, 250);
+    }
 
     if (!file || !runtimeVersion || !commitHash) {
       logger.warn('Upload attempt with missing required fields', {
