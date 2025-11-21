@@ -94,10 +94,17 @@ export default async function uploadHandler(
 
     res.status(200).json({ success: true, path });
   } catch (error) {
+    const errorInfo =
+      error instanceof Error
+        ? { message: error.message, stack: error.stack }
+        : typeof error === 'object' && error !== null
+        ? { ...(error as any) }
+        : { message: String(error) };
+
     logger.error('File upload failed', {
-      error: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : undefined,
+      error: errorInfo,
     });
+
     res.status(500).json({ error: 'Upload failed' });
   }
 }
