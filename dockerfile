@@ -6,9 +6,9 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Install all dependencies (including devDependencies needed for build)
 COPY package.json yarn.lock* ./
-RUN yarn install --frozen-lockfile --production && yarn cache clean
+RUN yarn install --frozen-lockfile && yarn cache clean
 
 # Rebuild the source code only when needed
 FROM base AS builder
