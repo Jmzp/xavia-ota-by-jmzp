@@ -19,8 +19,8 @@ jobs:
             set -e
             cd /app/xavia-ota
             git pull origin main
-            docker compose -f containers/prod/docker-compose.yml down
-            docker compose -f containers/prod/docker-compose.yml up -d --build
-            docker system prune -f
-            sleep 10
+            yarn install --frozen-lockfile
+            yarn build
+            sudo systemctl restart xavia-ota
+            sleep 5
             curl -f http://localhost:3000/api/health || exit 1

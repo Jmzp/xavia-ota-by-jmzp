@@ -1,0 +1,21 @@
+[Unit]
+Description=Xavia OTA Server
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/app/xavia-ota
+ExecStart=/usr/bin/yarn start
+Restart=on-failure
+RestartSec=10
+EnvironmentFile=/app/xavia-ota/.env.local
+Environment=NODE_ENV=production
+
+# Logs
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=xavia-ota
+
+[Install]
+WantedBy=multi-user.target
